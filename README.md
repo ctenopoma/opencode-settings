@@ -102,7 +102,12 @@ Orchestrator が dev/qa を回し、FAIL×3 または仕様割れで `docs/decis
 
 ---
 
-## 4. 方法論の出典
+## 4. 本物のskill/ループの導入
+有名ツール（**opencode-loop** / **BMAD-METHOD** / **spec-kit**）を組み込む手順は
+[docs/SETUP-REAL-SKILLS.md](docs/SETUP-REAL-SKILLS.md) を参照。本物が「書く/回す」、本リポジトリの
+検証ゲート・decisionキュー・承認GUIが「人が承認/数値で守る」で棲み分ける。
+
+## 5. 方法論の出典
 - 役割分離・brownfield（既存コード解析→設計）: BMAD-METHOD
 - spec→tasks→implement の規律: GitHub Spec Kit
 本リポジトリはこれらの考え方を opencode のエージェント/フローに落とし込んだもの。
