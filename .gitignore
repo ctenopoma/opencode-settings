@@ -1,0 +1,13 @@
+# 新実装の実出力（基準ではない）
+fixtures/golden/**/actual/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Rust / maturin
+target/
+*.so
+*.pyd

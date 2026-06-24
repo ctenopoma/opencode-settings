@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  "agent": {
+    "orchestrator": {
+      "description": "移行プロジェクト全体の司令塔。tasks.md から次ユニットを選び、worker を割り当て、検証結果を判定し、判断不能点を decision queue に積む。",
+      "mode": "primary",
+      "model": "anthropic/claude-opus-4-8",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/orchestrator.md}",
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "edit": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "todowrite": "allow",
+        "webfetch": "deny",
+        "websearch": "deny"
+      }
+    },
+    "analyst": {
+      "description": "レガシー Fortran を読み、振る舞い・I/O・グローバル状態(COMMON/module)・数値特性を抽出して設計書ドラフトを書く(brownfield Code-First)。",
+      "mode": "subagent",
+      "model": "anthropic/claude-opus-4-8",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/analyst.md}",
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "task": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      }
+    },
+    "architect": {
+      "description": "設計書をもとに Fortran モジュール → Python/Rust(pyo3) の境界・分担を設計し、移行マップを作る。",
+      "mode": "subagent",
+      "model": "anthropic/claude-opus-4-8",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/architect.md}",
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "task": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      }
+    },
+    "dev": {
+      "description": "承認済み設計書 1 ユニット分を Python/Rust(pyo3) で実装する作業者。設計書とゴールデン基準から外れない。",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "temperature": 0.0,
+      "prompt": "{file:./prompts/dev.md}",
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "edit": "allow",
+        "bash": "allow",
+        "task": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      }
+    },
+    "qa": {
+      "description": "実装ユニットを fixtures/golden の基準と数値許容誤差で比較し、合否を判定する。実装は変更しない。",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "temperature": 0.0,
+      "prompt": "{file:./prompts/qa.md}",
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "edit": "deny",
+        "bash": "allow",
+        "task": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      }
+    }
+  }
+}
