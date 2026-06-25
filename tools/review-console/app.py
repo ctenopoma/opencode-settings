@@ -25,6 +25,7 @@ import datetime as dt
 import difflib
 import hashlib
 import re
+import sys
 from pathlib import Path
 
 import markdown as md_lib
@@ -35,13 +36,15 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools"))
+from sync_stop_file import sync as _sync_stop_file
 DECISIONS = ROOT / "docs" / "decisions"
 DESIGN = ROOT / "docs" / "design"
 TASKS = ROOT / "tasks.md"
 
 app = FastAPI(title="Migration Review Console")
 
-_FM = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
+_FM = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n(.*)$", re.S)
 
 
 # ---------- 共通: markdown frontmatter ----------
@@ -256,6 +259,7 @@ def api_resolve(file: str, body: Approval):
     if body.note:
         md += f"\n\n> 承認メモ: {body.note}"
     write_md(path, meta, md)
+    _sync_stop_file(ROOT)
     return {"ok": True}
 
 
