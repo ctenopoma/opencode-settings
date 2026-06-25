@@ -1,6 +1,9 @@
 # 新実装の実出力（基準ではない）
 fixtures/golden/**/actual/
 
+# Review Console のローカル差分キャッシュ（点在する点時刻スナップショット）
+docs/design/*.snapshot.md
+
 # Python
 __pycache__/
 *.pyc
