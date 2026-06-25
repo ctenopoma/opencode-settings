@@ -30,6 +30,15 @@
 - `status: pending`
 起票したら、関連ユニットを `blocked` にして `blocked_by` に decision 番号を記録する。
 
+## イテレーション末尾の必須手順
+各イテレーションの最後に **必ず** 次のコマンドを実行して stop-file を同期する:
+```
+python tools/sync_stop_file.py
+```
+- `docs/decisions/` に `status: pending` が残っていれば `.has-pending` が作成され、opencode-loopd が次サイクルを開始しない。
+- pending がなくなっていれば `.has-pending` が削除され、ループが再開される。
+- このコマンドは冪等なので何度実行しても安全。
+
 ## 原則
 - 設計書・ゴールデン基準から外れる「それっぽい」実装を絶対に通さない。疑わしきは decision を起票。
 - 1 イテレーションでやることは小さく。状態は必ず `tasks.md` に永続化してから次へ。

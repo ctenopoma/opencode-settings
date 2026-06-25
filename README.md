@@ -110,9 +110,19 @@ Orchestrator が dev/qa を回し、FAIL×3 または仕様割れで `docs/decis
 ---
 
 ## 4. 本物のskill/ループの導入
-有名ツール（**opencode-loop** / **BMAD-METHOD** / **spec-kit**）を組み込む手順は
-[docs/SETUP-REAL-SKILLS.md](docs/SETUP-REAL-SKILLS.md) を参照。本物が「書く/回す」、本リポジトリの
-検証ゲート・decisionキュー・承認GUIが「人が承認/数値で守る」で棲み分ける。
+
+有名ツールとの配線手順は [docs/SETUP-REAL-SKILLS.md](docs/SETUP-REAL-SKILLS.md) を参照。
+
+採用・不採用の判断：
+- **BMAD-METHOD** = 採用。設計フェーズ（Phase 0-1）で「Document existing project」を使う。出力は `analyst` が `docs/design/` に正規化する。
+- **opencode-loop（loopd）** = 採用。Phase 2 の無人実装ループを駆動する。`loop-prompt.md` と `--stop-file` で制御。
+- **spec-kit** = 不採用。このリポジトリの orchestrator + `tasks.md` + dev/qa が同じ役割を担い、かつ golden 数値ゲートに密結合しているため。
+
+### stop-file の仕組み（配線済み）
+`tools/sync_stop_file.py` が `docs/decisions/.has-pending` を冪等に管理する。
+- orchestrator の各イテレーション末尾に自動実行（`prompts/orchestrator.md` に記載）。
+- Review Console で decision を承認/却下すると自動実行（`tools/review-console/app.py` から呼び出し）。
+- loopd の `--stop-file docs/decisions/.has-pending` と組み合わせて、pending decision がある間はループが止まる。
 
 ## 5. 方法論の出典
 - 役割分離・brownfield（既存コード解析→設計）: BMAD-METHOD
