@@ -44,7 +44,7 @@ TASKS = ROOT / "tasks.md"
 
 app = FastAPI(title="Migration Review Console")
 
-_FM = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
+_FM = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n(.*)$", re.S)
 
 
 # ---------- 共通: markdown frontmatter ----------

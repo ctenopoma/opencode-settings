@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-_FM = re.compile(r"^---\n(.*?)\n---\n", re.S)
+_FM = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
 
 
 def _status(path: Path) -> str:
