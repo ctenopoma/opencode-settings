@@ -57,7 +57,7 @@ npx bmad-method@latest install --tools opencode
 - opencode サポート確認済み: `opencode  OpenCode  .agents/skills`。
 - **設計用の本命** = brownfield の「**Document existing project (DP)**」ワークフロー。
   別repoのレガシー Fortran を入力に、既存コードから設計/ドキュメントを生成する。
-- 実装用 = BMAD の dev / QA エージェント。
+- **BMAD は設計フェーズのみに使う。** 実装は自前の dev/qa エージェント（golden ゲート密結合）で回す（§役割分担の注を参照）。
 
 ### ★ GUI 連携の橋渡し（必須の1ステップ）
 BMAD は独自の場所/書式で設計書を出力する。承認GUI(Review Console)は `docs/design/*.md`
@@ -87,16 +87,38 @@ BMAD(brownfield: Document existing project)
 ```
 
 ### Phase 2（実装フェーズ）— opencode-loopd が駆動
+
+> **ループは自動では始まらない。** 下記コマンドを人間が1回実行して初めて回り始める。
+> 起動後の「周回・停止・再開」は自動だが、最初のスイッチは必ず人間が入れる
+> （approved な設計書がゼロのまま勝手に走り出さないための設計）。
+
+#### 起動（人間が1回）
 ```bash
 opencode-loopd --project . --every 10m \
   --prompt-file loop-prompt.md \
   --stop-file docs/decisions/.has-pending \
   --max-failures 3 --max-runtime 6h
 ```
+このプロセスが生きている間だけ 10 分ごとに orchestrator が 1 イテレーション回る。
+ターミナルを閉じる/PC を再起動すると止まる。常駐させたい場合は後述の「Windows タスクスケジューラ登録」へ。
 
 - `loop-prompt.md`: プロジェクトルートに配置済み。orchestrator を 1 イテレーション進める内容。
 - `--stop-file`: `tools/sync_stop_file.py` が冪等に管理する（下記参照）。orchestrator イテレーション末尾と Review Console の decision 承認後に自動実行される。
 - `--verify` は使わない（ユニットごとに tolerance が異なるため静的コマンドにできない）。
+
+#### ⚠ 初回の落とし穴：サンプル decision がループを止める
+クリーンな状態では `docs/decisions/0001-example-common-block-state.md` が `status: pending`。
+このまま `sync_stop_file.py` が走ると `.has-pending` が作られ、ループは「承認待ち」で起動しない。
+**実プロジェクト開始時にサンプル decision を削除する**こと（`tasks.md` のサンプル行も同様）。
+
+#### 監視
+- 進捗の正典は `tasks.md`（`pending`/`in-progress`/`verified`/`blocked`）。
+- 停止中かどうかは `docs/decisions/.has-pending` の有無で判定できる（存在＝承認待ちで停止中）。
+- loopd の標準出力／ログでイテレーションごとのサマリを確認する（リダイレクト例: `opencode-loopd ... 2>&1 | tee loop.log`）。
+
+#### 停止
+- 一時起動なら起動したターミナルで `Ctrl-C`。
+- 常駐（タスクスケジューラ）なら下記の登録を解除（`opencode-loopd uninstall-task` 等、ツールのヘルプを参照）。
 
 ### stop-file のライフサイクル（実装済み）
 ```
